@@ -1,24 +1,37 @@
 #!/usr/bin/env bash
 
-# Can we hack together an executable?
+# What do we need to do to hack together an executable?
 
 esmf_dir=/scratch/tm70/mrd599/esmf-8.3.0
-
-cesm_dir=/g/data/tm70/ds0092/CESM
-cmeps_dir=$cesm_dir/components/cmeps
-
-A_bld_dir=/scratch/tm70/ds0092/cime/scratch/A/bld
-GMOM_bld_dir=/scratch/tm70/ds0092/cime/scratch/GMOM_JRA_WD/bld
-# A_bld_dir=$GMOM_bld_dir
-
-nuopc_bld_dir=$GMOM_bld_dir/intel/openmpi/nodebug/nothreads/nuopc
-
 . /etc/profile.d/modules.sh
 module purge
 module load openmpi intel-compiler intel-mkl netcdf pnetcdf python3-as-python
 export NETCDF_PATH=/apps/netcdf/4.7.3
 export PKG_CONFIG_PATH=/apps/netcdf/4.7.3/lib/pkgconfig:/apps/intel-ct/2022.1.0/mkl/lib/pkgconfig:/half-root/usr/lib64/pkgconfig:/apps/netcdf/4.7.3/lib/Intel/pkgconfig:/apps/netcdf/4.7.3/lib/Intel/pkgconfig
 export ESMFMKFILE=$esmf_dir/lib/libg/Linux.intel.x86_64_medium.openmpi.default/esmf.mk
+
+#cmeps_dir=$cesm_dir/components/cmeps
+#A_bld_dir=/scratch/tm70/ds0092/cime/scratch/A/bld
+#GMOM_bld_dir=/scratch/tm70/ds0092/cime/scratch/GMOM_JRA_WD/bld
+# A_bld_dir=$GMOM_bld_dir
+#nuopc_bld_dir=$GMOM_bld_dir/intel/openmpi/nodebug/nothreads/nuopc
+
+cwd=$(pwd)
+
+cesm_dir=/g/data/tm70/ds0092/CESM
+sharedlib_root=/scratch/tm70/ds0092/cime/scratch/GMOM_JRA_WD/bld/intel/openmpi/nodebug/nothreads/nuopc
+
+# Build CDEPS using cmake
+# ====================
+mkdir -p ./cdeps
+cd ./cdeps
+cmake -DSRC_ROOT=${cesm_dir}  -Dcompile_threaded="FALSE"  -DCASEROOT=${cwd} -DCIMEROOT="${cesm_dir}/cime" -DCOMPILER="intel" -DDEBUG="FALSE" -DMACH="gadi" -DMPILIB="openmpi" -DNINST_VALUE="c1a1i1o1r1w1" -DOS="LINUX" -DPIO_VERSION="2" -DCMAKE_Fortran_COMPILER_WORKS=1 -DCMAKE_INSTALL_PREFIX:PATH=/ -DLIBROOT=${sharedlib_root}  -DPIO_C_LIBRARY=${sharedlib_root}/lib -DPIO_C_INCLUDE_DIR=${sharedlib_root}/include  -DPIO_Fortran_LIBRARY=${sharedlib_root}/lib -DPIO_Fortran_INCLUDE_DIR=${sharedlib_root}/include $cesm_dir/components/cdeps
+make install VERBOSE=1 DESTDIR="./"
+
+cd ../
+cdeps_bld_dir=./cdeps
+
+exit
 
 # Compile CMEPS source
 flags="-I. -I$nuopc_bld_dir/CDEPS/fox/include -I$nuopc_bld_dir/CDEPS/dshr -I$nuopc_bld_dir/include -I$nuopc_bld_dir/CDEPS/include -I$nuopc_bld_dir/nuopc/esmf/c1a1i1o1r1w1/include -I$nuopc_bld_dir/finclude -I/apps/netcdf/4.7.3/include -I$GMOM_bld_dir/atm/obj -I$GMOM_bld_dir/ice/obj -I$A_bld_dir/ocn/obj -I$GMOM_bld_dir/glc/obj -I$GMOM_bld_dir/rof/obj -I$GMOM_bld_dir/wav/obj -I$GMOM_bld_dir/esp/obj -I$GMOM_bld_dir/iac/obj -I$GMOM_bld_dir/lnd/obj -I. -I$cesm_dir/cime/scripts/GMOM_JRA_WD/SourceMods/src.drv -I$cmeps_dir/mediator -I$cmeps_dir/cesm/flux_atmocn -I$cmeps_dir/cmeps/cesm/driver -I$GMOM_bld_dir/lib/include -qno-opt-dynamic-align  -convert big_endian -assume byterecl -ftz -traceback -assume realloc_lhs -fp-model source -O2 -debug minimal -I$esmf_dir/mod/modg/Linux.intel.x86_64_medium.openmpi.default -I$esmf_dir/src/include -I/apps/netcdf/4.7.3/include  -DLINUX  -DCESMCOUPLED -DFORTRANUNDERSCORE -DCPRINTEL -DNDEBUG -DUSE_ESMF_LIB -DHAVE_MPI -DNUOPC_INTERFACE -DPIO2 -DHAVE_SLASHPROC -DESMF_VERSION_MAJOR=8 -DESMF_VERSION_MINOR=3 -DATM_PRESENT -DICE_PRESENT -DOCN_PRESENT -DROF_PRESENT -DWAV_PRESENT -DMED_PRESENT -DPIO2 -free -DUSE_CONTIGUOUS="
