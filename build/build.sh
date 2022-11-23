@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 
-# Can we create a GMOM_JRA_WD build, but switching out the active ocean component
-# for a CDEPS DOCN DOM component? Let's pick up the build at CDEPS (assume shared
-# libs are already built).
+# Can we create a "D_JRA_WD" build by switching out the active ocean component
+# for a CDEPS DOCN DOM component? These scripts assume that the shared libs
+# have already been created by CIME:
+# `./case.build --sharedlib-only`
+# To do the model builds, CIME uses cmake for some components and a monster
+# do-it-all Makefile for others (see cime/CIME/Tools/Makefile). The Makefile
+# expects a specific directory structure for the build.
 
 ACTIVE_OCN=true
 
@@ -64,7 +68,7 @@ fi
 # Build CICE6
 # ====================
 cd ${cwd}/cice6
-make complib -j 8 COMP_NAME=cice COMPLIB=${cwd}/lib/libice.a -f /g/data/tm70/ds0092/CESM/cime/scripts/GMOM_JRA_WD/Tools/Makefile USER_CPPDEFS=" -Dncdf" CIME_MODEL=cesm  SMP=FALSE CASEROOT="/g/data/tm70/ds0092/CESM/cime/scripts/GMOM_JRA_WD" CASETOOLS="/g/data/tm70/ds0092/CESM/cime/scripts/GMOM_JRA_WD/Tools" CIMEROOT="/g/data/tm70/ds0092/CESM/cime" SRCROOT="/g/data/tm70/ds0092/CESM" COMP_INTERFACE="nuopc" COMPILER="intel" DEBUG="FALSE" EXEROOT="/scratch/tm70/ds0092/cime/scratch/GMOM_JRA_WD/bld" RUNDIR="/scratch/tm70/ds0092/cime/scratch/GMOM_JRA_WD/run" INCROOT="/scratch/tm70/ds0092/cime/scratch/GMOM_JRA_WD/bld/lib/include" LIBROOT="/scratch/tm70/ds0092/cime/scratch/GMOM_JRA_WD/bld/lib" MACH="gadi" MPILIB="openmpi" NINST_VALUE="c1a1i1o1r1w1" OS="LINUX" PIO_VERSION=2 SHAREDLIBROOT="/scratch/tm70/ds0092/cime/scratch/GMOM_JRA_WD/bld" SMP_PRESENT="FALSE" USE_ESMF_LIB="TRUE" USE_MOAB="FALSE" COMP_LND="slnd" USE_TRILINOS="FALSE" USE_ALBANY="FALSE" USE_PETSC="FALSE"
+make complib -j 8 COMP_NAME=cice COMPLIB=${cwd}/lib/libice.a -f ${cesm_dir}/cime/CIME/Tools/Makefile USER_CPPDEFS=" -Dncdf" CIME_MODEL=cesm  SMP=FALSE CASEROOT=${cwd} CASETOOLS=${cesm_dir}/cime/CIME/Tools CIMEROOT=${cesm_dir}/cime SRCROOT=${cesm_dir} COMP_INTERFACE="nuopc" COMPILER="intel" DEBUG="FALSE" EXEROOT="/scratch/tm70/ds0092/cime/scratch/GMOM_JRA_WD/bld" RUNDIR="/scratch/tm70/ds0092/cime/scratch/GMOM_JRA_WD/run" INCROOT="/scratch/tm70/ds0092/cime/scratch/GMOM_JRA_WD/bld/lib/include" LIBROOT="/scratch/tm70/ds0092/cime/scratch/GMOM_JRA_WD/bld/lib" MACH="gadi" MPILIB="openmpi" NINST_VALUE="c1a1i1o1r1w1" OS="LINUX" PIO_VERSION=2 SHAREDLIBROOT="/scratch/tm70/ds0092/cime/scratch/GMOM_JRA_WD/bld" SMP_PRESENT="FALSE" USE_ESMF_LIB="TRUE" USE_MOAB="FALSE" COMP_LND="slnd" USE_PETSC="FALSE"
 
 # Build WW3
 # ====================
