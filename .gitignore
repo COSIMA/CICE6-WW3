@@ -1,5 +1,0 @@
-build/lib
-build/cdeps
-build/cmeps
-build/cice6/*
-!build/cice6/Filepath
