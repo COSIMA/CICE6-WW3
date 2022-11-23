@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
-# What do we need to do to hack together an executable?
+# Can we create a GMOM_JRA_WD build, but switching out the active ocean component
+# for a CDEPS DOCN DOM component? Let's pick up the build at CDEPS (assume shared
+# libs are already built).
+
+ACTIVE_OCN=true
 
 esmf_dir=/scratch/tm70/mrd599/esmf-8.3.0
 . /etc/profile.d/modules.sh
@@ -21,17 +25,50 @@ cwd=$(pwd)
 cesm_dir=/g/data/tm70/ds0092/CESM
 sharedlib_root=/scratch/tm70/ds0092/cime/scratch/GMOM_JRA_WD/bld/intel/openmpi/nodebug/nothreads/nuopc
 
-# Build CDEPS using cmake
+# Build CDEPS
 # ====================
-mkdir -p ./cdeps
-cd ./cdeps
+cdeps_bld_dir=${cwd}/cdeps
+mkdir -p $cdeps_bld_dir
+cd $cdeps_bld_dir
 cmake -DSRC_ROOT=${cesm_dir}  -Dcompile_threaded="FALSE"  -DCASEROOT=${cwd} -DCIMEROOT="${cesm_dir}/cime" -DCOMPILER="intel" -DDEBUG="FALSE" -DMACH="gadi" -DMPILIB="openmpi" -DNINST_VALUE="c1a1i1o1r1w1" -DOS="LINUX" -DPIO_VERSION="2" -DCMAKE_Fortran_COMPILER_WORKS=1 -DCMAKE_INSTALL_PREFIX:PATH=/ -DLIBROOT=${sharedlib_root}  -DPIO_C_LIBRARY=${sharedlib_root}/lib -DPIO_C_INCLUDE_DIR=${sharedlib_root}/include  -DPIO_Fortran_LIBRARY=${sharedlib_root}/lib -DPIO_Fortran_INCLUDE_DIR=${sharedlib_root}/include $cesm_dir/components/cdeps
 make install VERBOSE=1 DESTDIR="./"
+cd ${cwd}
 
-cd ../
-cdeps_bld_dir=./cdeps
+mkdir -p ${cwd}/lib
 
-exit
+# Build atm data model
+# ====================
+cd ${cdeps_bld_dir}/datm
+make datm
+ln -sf ${cdeps_bld_dir}/datm/libdatm.a ${cwd}/lib/libatm.a
+cd ${cwd}
+
+# Build rof data model
+# ====================
+cd ${cdeps_bld_dir}/drof
+make drof
+ln -sf ${cdeps_bld_dir}/drof/libdrof.a ${cwd}/lib/librof.a
+cd ${cwd}
+
+# Build ocn model
+# ====================
+if [ "$ACTIVE_OCN" = true ] ; then
+    echo "Not implemented"
+else
+    cd ${cdeps_bld_dir}/docn
+    make docn
+    ln -sf ${cdeps_bld_dir}/docn/libdocn.a ${cwd}/lib/libocn.a
+    cd ${cwd}
+fi
+
+# Build CICE6
+# ====================
+cd ${cwd}/cice6
+make complib -j 8 COMP_NAME=cice COMPLIB=${cwd}/lib/libice.a -f /g/data/tm70/ds0092/CESM/cime/scripts/GMOM_JRA_WD/Tools/Makefile USER_CPPDEFS=" -Dncdf" CIME_MODEL=cesm  SMP=FALSE CASEROOT="/g/data/tm70/ds0092/CESM/cime/scripts/GMOM_JRA_WD" CASETOOLS="/g/data/tm70/ds0092/CESM/cime/scripts/GMOM_JRA_WD/Tools" CIMEROOT="/g/data/tm70/ds0092/CESM/cime" SRCROOT="/g/data/tm70/ds0092/CESM" COMP_INTERFACE="nuopc" COMPILER="intel" DEBUG="FALSE" EXEROOT="/scratch/tm70/ds0092/cime/scratch/GMOM_JRA_WD/bld" RUNDIR="/scratch/tm70/ds0092/cime/scratch/GMOM_JRA_WD/run" INCROOT="/scratch/tm70/ds0092/cime/scratch/GMOM_JRA_WD/bld/lib/include" LIBROOT="/scratch/tm70/ds0092/cime/scratch/GMOM_JRA_WD/bld/lib" MACH="gadi" MPILIB="openmpi" NINST_VALUE="c1a1i1o1r1w1" OS="LINUX" PIO_VERSION=2 SHAREDLIBROOT="/scratch/tm70/ds0092/cime/scratch/GMOM_JRA_WD/bld" SMP_PRESENT="FALSE" USE_ESMF_LIB="TRUE" USE_MOAB="FALSE" COMP_LND="slnd" USE_TRILINOS="FALSE" USE_ALBANY="FALSE" USE_PETSC="FALSE"
+
+# Build WW3
+# ====================
+
 
 # Compile CMEPS source
 flags="-I. -I$nuopc_bld_dir/CDEPS/fox/include -I$nuopc_bld_dir/CDEPS/dshr -I$nuopc_bld_dir/include -I$nuopc_bld_dir/CDEPS/include -I$nuopc_bld_dir/nuopc/esmf/c1a1i1o1r1w1/include -I$nuopc_bld_dir/finclude -I/apps/netcdf/4.7.3/include -I$GMOM_bld_dir/atm/obj -I$GMOM_bld_dir/ice/obj -I$A_bld_dir/ocn/obj -I$GMOM_bld_dir/glc/obj -I$GMOM_bld_dir/rof/obj -I$GMOM_bld_dir/wav/obj -I$GMOM_bld_dir/esp/obj -I$GMOM_bld_dir/iac/obj -I$GMOM_bld_dir/lnd/obj -I. -I$cesm_dir/cime/scripts/GMOM_JRA_WD/SourceMods/src.drv -I$cmeps_dir/mediator -I$cmeps_dir/cesm/flux_atmocn -I$cmeps_dir/cmeps/cesm/driver -I$GMOM_bld_dir/lib/include -qno-opt-dynamic-align  -convert big_endian -assume byterecl -ftz -traceback -assume realloc_lhs -fp-model source -O2 -debug minimal -I$esmf_dir/mod/modg/Linux.intel.x86_64_medium.openmpi.default -I$esmf_dir/src/include -I/apps/netcdf/4.7.3/include  -DLINUX  -DCESMCOUPLED -DFORTRANUNDERSCORE -DCPRINTEL -DNDEBUG -DUSE_ESMF_LIB -DHAVE_MPI -DNUOPC_INTERFACE -DPIO2 -DHAVE_SLASHPROC -DESMF_VERSION_MAJOR=8 -DESMF_VERSION_MINOR=3 -DATM_PRESENT -DICE_PRESENT -DOCN_PRESENT -DROF_PRESENT -DWAV_PRESENT -DMED_PRESENT -DPIO2 -free -DUSE_CONTIGUOUS="
