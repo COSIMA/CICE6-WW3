@@ -83,6 +83,7 @@ echo -e "====================\n"
 
 echo -e "Building CMEPS executable"
 echo -e "===================="
+cd ${bld_dir}/cpl/obj
 flags="-I. -I${sharedlib_dir}/CDEPS/fox/include -I${sharedlib_dir}/CDEPS/dshr -I${sharedlib_dir}/include -I${sharedlib_dir}/nuopc/esmf/c1a1i1o1r1w1/include -I/apps/netcdf/4.7.3/include -I${bld_dir}/atm/obj -I${bld_dir}/ice/obj -I${bld_dir}/ocn/obj -I${bld_dir}/glc/obj -I${bld_dir}/rof/obj -I${bld_dir}/wav/obj -I${bld_dir}/esp/obj -I${bld_dir}/lnd/obj -I. -I${cesm_dir}/components/cmeps/mediator -I${cesm_dir}/components/cmeps/cesm/flux_atmocn -I${cesm_dir}/comonents/cmeps/cesm/driver -I${bld_dir}/lib/include -qno-opt-dynamic-align  -convert big_endian -assume byterecl -ftz -traceback -assume realloc_lhs -fp-model source -O2 -debug minimal -I${esmf_dir}/mod/modg/Linux.intel.x86_64_medium.openmpi.default -I${esmf_dir}/src/include -I/apps/netcdf/4.7.3/include  -DLINUX  -DCESMCOUPLED -DFORTRANUNDERSCORE -DCPRINTEL -DNDEBUG -DUSE_ESMF_LIB -DHAVE_MPI -DNUOPC_INTERFACE -DPIO2 -DHAVE_SLASHPROC -DESMF_VERSION_MAJOR=8 -DESMF_VERSION_MINOR=3 -DATM_PRESENT -DICE_PRESENT -DOCN_PRESENT -DROF_PRESENT -DWAV_PRESENT -DMED_PRESENT -DPIO2 -free -DUSE_CONTIGUOUS="
 
 # The order of these is important
@@ -92,14 +93,14 @@ for file in ${cmeps_src_files[@]}; do
     mpif90 -c $flags ${cesm_dir}/components/cmeps/$file
 done
 
-# Compile cesm executable
-mkdir -p ./cmeps
-mv *.mod *.o ./cmeps/
-
 object_files=()
 for file in ${cmeps_src_files[@]}; do
     bname=$(basename $file)
-    object_files+=( "./cmeps/${bname%.F90}.o" )
+    object_files+=( "./${bname%.F90}.o" )
 done
 
-mpif90 -o ./cesm.exe ${object_files[@]} -L$GMOM_bld_dir/lib/ -latm -lice -lrof -lwav -L$A_bld_dir/lib/ -locn -L$nuopc_bld_dir/CDEPS/dshr -ldshr -L$nuopc_bld_dir/CDEPS/streams -lstreams -L$nuopc_bld_dir/nuopc/esmf/c1a1i1o1r1w1/lib -lcsm_share -L$nuopc_bld_dir/lib -lpiof -lpioc -lgptl -lmct -lmpeu -mkl=cluster -mkl=cluster -lnetcdf -lnetcdff -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -liomp5 -lm -L$nuopc_bld_dir/CDEPS/fox/lib -lFoX_dom -lFoX_sax -lFoX_utils -lFoX_fsys -lFoX_wxml -lFoX_common -lFoX_fsys -L$esmf_dir/lib/libg/Linux.intel.x86_64_medium.openmpi.default -Wl,-rpath,$esmf_dir/lib/libg/Linux.intel.x86_64_medium.openmpi.default -lesmf -lmpi_cxx -cxxlib -lrt -ldl -mkl -lnetcdff -lnetcdf -lpioc -L$esmf_dir/lib/libg/Linux.intel.x86_64_medium.openmpi.default -L/apps/netcdf/4.7.3/lib
+mpif90 -o ${bld_dir}/cesm.exe ${object_files[@]} -L${bld_dir}/lib/ -latm -lice -lrof -lwav -locn -L${sharedlib_dir}/CDEPS/dshr -ldshr -L${sharedlib_dir}/CDEPS/streams -lstreams -L${sharedlib_dir}/nuopc/esmf/c1a1i1o1r1w1/lib -lcsm_share -L${sharedlib_dir}/lib -lpiof -lpioc -lgptl -lmct -lmpeu -mkl=cluster -mkl=cluster -lnetcdf -lnetcdff -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -liomp5 -lm -L${sharedlib_dir}/CDEPS/fox/lib -lFoX_dom -lFoX_sax -lFoX_utils -lFoX_fsys -lFoX_wxml -lFoX_common -lFoX_fsys -L${esmf_dir}/lib/libg/Linux.intel.x86_64_medium.openmpi.default -Wl,-rpath,${esmf_dir}/lib/libg/Linux.intel.x86_64_medium.openmpi.default -lesmf -lmpi_cxx -cxxlib -lrt -ldl -mkl -lnetcdff -lnetcdf -lpioc -L${esmf_dir}/lib/libg/Linux.intel.x86_64_medium.openmpi.default -L/apps/netcdf/4.7.3/lib
+echo -e "====================\n"
+
+cd ${cwd}
+echo -e "Build completed successfully"
