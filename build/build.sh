@@ -74,8 +74,6 @@ make complib -j 8 COMP_NAME=cice COMPLIB=${bld_dir}/lib/libice.a -f ${cesm_dir}/
 cd ${cwd}
 echo -e "====================\n"
 
-# Build WW3
-# ====================
 echo -e "Building ww3"
 echo -e "===================="
 cd ${bld_dir}/wav/obj
@@ -83,16 +81,15 @@ cmake -DCASEROOT=${cwd} -DCIMEROOT=${cesm_dir}/cime -DCOMPILER="intel" -DLIBROOT
 make install VERBOSE=1 DESTDIR=${bld_dir}
 echo -e "====================\n"
 
-exit
-
-# Compile CMEPS source
-flags="-I. -I$nuopc_bld_dir/CDEPS/fox/include -I$nuopc_bld_dir/CDEPS/dshr -I$nuopc_bld_dir/include -I$nuopc_bld_dir/CDEPS/include -I$nuopc_bld_dir/nuopc/esmf/c1a1i1o1r1w1/include -I$nuopc_bld_dir/finclude -I/apps/netcdf/4.7.3/include -I$GMOM_bld_dir/atm/obj -I$GMOM_bld_dir/ice/obj -I$A_bld_dir/ocn/obj -I$GMOM_bld_dir/glc/obj -I$GMOM_bld_dir/rof/obj -I$GMOM_bld_dir/wav/obj -I$GMOM_bld_dir/esp/obj -I$GMOM_bld_dir/iac/obj -I$GMOM_bld_dir/lnd/obj -I. -I$cesm_dir/cime/scripts/GMOM_JRA_WD/SourceMods/src.drv -I$cmeps_dir/mediator -I$cmeps_dir/cesm/flux_atmocn -I$cmeps_dir/cmeps/cesm/driver -I$GMOM_bld_dir/lib/include -qno-opt-dynamic-align  -convert big_endian -assume byterecl -ftz -traceback -assume realloc_lhs -fp-model source -O2 -debug minimal -I$esmf_dir/mod/modg/Linux.intel.x86_64_medium.openmpi.default -I$esmf_dir/src/include -I/apps/netcdf/4.7.3/include  -DLINUX  -DCESMCOUPLED -DFORTRANUNDERSCORE -DCPRINTEL -DNDEBUG -DUSE_ESMF_LIB -DHAVE_MPI -DNUOPC_INTERFACE -DPIO2 -DHAVE_SLASHPROC -DESMF_VERSION_MAJOR=8 -DESMF_VERSION_MINOR=3 -DATM_PRESENT -DICE_PRESENT -DOCN_PRESENT -DROF_PRESENT -DWAV_PRESENT -DMED_PRESENT -DPIO2 -free -DUSE_CONTIGUOUS="
+echo -e "Building CMEPS executable"
+echo -e "===================="
+flags="-I. -I${sharedlib_dir}/CDEPS/fox/include -I${sharedlib_dir}/CDEPS/dshr -I${sharedlib_dir}/include -I${sharedlib_dir}/nuopc/esmf/c1a1i1o1r1w1/include -I/apps/netcdf/4.7.3/include -I${bld_dir}/atm/obj -I${bld_dir}/ice/obj -I${bld_dir}/ocn/obj -I${bld_dir}/glc/obj -I${bld_dir}/rof/obj -I${bld_dir}/wav/obj -I${bld_dir}/esp/obj -I${bld_dir}/lnd/obj -I. -I${cesm_dir}/components/cmeps/mediator -I${cesm_dir}/components/cmeps/cesm/flux_atmocn -I${cesm_dir}/comonents/cmeps/cesm/driver -I${bld_dir}/lib/include -qno-opt-dynamic-align  -convert big_endian -assume byterecl -ftz -traceback -assume realloc_lhs -fp-model source -O2 -debug minimal -I${esmf_dir}/mod/modg/Linux.intel.x86_64_medium.openmpi.default -I${esmf_dir}/src/include -I/apps/netcdf/4.7.3/include  -DLINUX  -DCESMCOUPLED -DFORTRANUNDERSCORE -DCPRINTEL -DNDEBUG -DUSE_ESMF_LIB -DHAVE_MPI -DNUOPC_INTERFACE -DPIO2 -DHAVE_SLASHPROC -DESMF_VERSION_MAJOR=8 -DESMF_VERSION_MINOR=3 -DATM_PRESENT -DICE_PRESENT -DOCN_PRESENT -DROF_PRESENT -DWAV_PRESENT -DMED_PRESENT -DPIO2 -free -DUSE_CONTIGUOUS="
 
 # The order of these is important
 cmeps_src_files=( cesm/driver/esm_time_mod.F90 mediator/med_kind_mod.F90 cesm/flux_atmocn/shr_flux_mod.F90 cesm/driver/t_driver_timers_mod.F90 cesm/driver/util.F90 mediator/med_constants_mod.F90 mediator/med_utils_mod.F90 mediator/med_methods_mod.F90 mediator/med_internalstate_mod.F90 mediator/med_phases_ocnalb_mod.F90 mediator/med_io_mod.F90 mediator/med_time_mod.F90 mediator/esmFlds.F90 mediator/med_phases_profile_mod.F90 mediator/med_diag_mod.F90 mediator/med_map_mod.F90 mediator/med_merge_mod.F90 mediator/esmFldsExchange_cesm_mod.F90 mediator/esmFldsExchange_nems_mod.F90 mediator/esmFldsExchange_hafs_mod.F90 mediator/med_phases_history_mod.F90 mediator/med_phases_prep_lnd_mod.F90 mediator/med_phases_prep_ice_mod.F90 mediator/med_fraction_mod.F90 mediator/med_phases_prep_rof_mod.F90 mediator/med_phases_prep_wav_mod.F90 mediator/med_phases_aofluxes_mod.F90 mediator/med_phases_post_wav_mod.F90 mediator/med_phases_post_rof_mod.F90 mediator/med_phases_post_glc_mod.F90 mediator/med_phases_post_atm_mod.F90 mediator/med_phases_prep_glc_mod.F90 mediator/med_phases_post_ice_mod.F90 mediator/med_phases_post_lnd_mod.F90 mediator/med_phases_restart_mod.F90 mediator/med_phases_post_ocn_mod.F90 mediator/med_phases_prep_atm_mod.F90 mediator/med_phases_prep_ocn_mod.F90 mediator/med.F90 cesm/driver/esm.F90 cesm/driver/ensemble_driver.F90 cesm/driver/esmApp.F90 )
 
 for file in ${cmeps_src_files[@]}; do
-    mpif90 -c $flags $cmeps_dir/$file
+    mpif90 -c $flags ${cesm_dir}/components/cmeps/$file
 done
 
 # Compile cesm executable
