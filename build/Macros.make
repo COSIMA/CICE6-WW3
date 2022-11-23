@@ -1,4 +1,3 @@
-
 # This file is auto-generated, do not edit. If you want to change
 # sharedlib flags, you can edit the cmake_macros in this case. You
 # can change flags for specific sharedlibs only by checking COMP_NAME.
