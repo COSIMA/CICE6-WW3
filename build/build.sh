@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
 
-# Can we create a "D_JRA_WD" build by switching out the active ocean component
-# for a CDEPS DOCN DOM component? These scripts assume that the shared libs
-# have already been created by CIME:
-# `./case.build --sharedlib-only`
+# Build a "D_JRA_WD" compset (CICE6-WW3-DOCN-DATM-DROF-SLND-SGLC). Mostly 
+# just a learning exercise unpacking how the CIME build system fits together.
+#
+# These scripts assume that the shared libs have already been created by CIME.
+# 
 # To do the model builds, CIME uses cmake for some components and a monster
 # do-it-all Makefile for others (see cime/CIME/Tools/Makefile). The Makefile
 # expects a specific directory structure for the build.
 
 set -e
 
-ACTIVE_OCN=true
+ACTIVE_OCN=false
 
 esmf_dir=/scratch/tm70/mrd599/esmf-8.3.0
 . /etc/profile.d/modules.sh
@@ -61,6 +62,7 @@ if [ "$ACTIVE_OCN" = true ] ; then
     cp ${cwd}/Filepath.fms ${ocn_obj}/FMS/Filepath
     make -f ${cesm_dir}/libraries/FMS/Makefile.cesm -C ${ocn_obj}/FMS CASEROOT=${cwd} USER_INCLDIR="-I${cesm_dir}/libraries/FMS/src/include -I${cesm_dir}/libraries/FMS/src/fms2_io/include -I${cesm_dir}/libraries/FMS/src/mpp/include" COMPLIB=libfms.a CASETOOLS=${cesm_dir}/cime/CIME/Tools CIMEROOT=${cesm_dir}/cime COMP_INTERFACE="nuopc" COMPILER="intel" DEBUG="FALSE" EXEROOT=${bld_dir} INCROOT=${bld_dir}/lib/include LIBROOT=${bld_dir}/lib MACH="gadi" MPILIB="openmpi" NINST_VALUE="c1a1i1o1r1w1" OS="LINUX" SHAREDLIBROOT=${bld_dir} USE_ESMF_LIB="TRUE" BUILD_THREADED="FALSE"
 
+    cd ${ocn_obj}
     cp ${cwd}/Filepath.mom6 ${ocn_obj}/Filepath
     make complib -j 8 COMP_NAME="mom" COMPLIB=${bld_dir}/lib/libocn.a -f ${cesm_dir}/cime/CIME/Tools/Makefile USER_INCLDIR="-I${cesm_dir}/libraries/FMS/src/include -I${cesm_dir}/libraries/FMS/src/mpp/include -I${bld_dir}/ocn/obj/FMS" CIME_MODEL="cesm" SMP="FALSE" CASEROOT=${cwd} CASETOOLS=${cesm_dir}/cime/CIME/Tools CIMEROOT=${cesm_dir}/cime SRCROOT=${cesm_dir} COMP_INTERFACE="nuopc" COMPILER="intel" DEBUG="FALSE" EXEROOT=${bld_dir} INCROOT=${bld_dir}/lib/include LIBROOT=${bld_dir}/lib MACH="gadi" MPILIB="openmpi" NINST_VALUE="c1a1i1o1r1w1" OS="LINUX" PIO_VERSION=2 SHAREDLIBROOT=${bld_dir} SMP_PRESENT="FALSE" USE_ESMF_LIB="TRUE" USE_MOAB="FALSE" COMP_LND="slnd" COMP_ATM="datm" USE_PETSC="FALSE"
 else
