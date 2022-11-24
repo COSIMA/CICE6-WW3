@@ -44,19 +44,13 @@ ln -sf ${bld_dir}/rof/obj/libdrof.a ${bld_dir}/lib/librof.a
 cd ${cwd}
 echo -e "====================\n"
 
-# ln has annoying behaviour with target dirs. Let's just remove
-# any existing directory for simplicity
 ocn_obj=${bld_dir}/ocn/obj
-if [ -d ${ocn_obj} ]; then
-    if [ -L ${ocn_obj} ]; then
-        unlink ${ocn_obj}
-    else
-        rm -r ${ocn_obj}
-    fi
-fi
 if [ "$ACTIVE_OCN" = true ] ; then
     echo -e "Building mom6"
     echo -e "===================="
+    if [ -L ${ocn_obj} ]; then
+        unlink ${ocn_obj}
+    fi
     mkdir -p ${ocn_obj}/FMS
     
     cp ${cwd}/Filepath.fms ${ocn_obj}/FMS/Filepath
@@ -69,6 +63,9 @@ else
     echo -e "Building data ocn model"
     echo -e "===================="
     # ln has annoying behaviour with target dirs
+    if [ -d ${ocn_obj} ] && [ ! -L ${ocn_obj} ]; then
+        rm -r ${ocn_obj}
+    fi
     ln -sf ${sharedlib_dir}/CDEPS/docn ${ocn_obj}
     cd ${ocn_obj}
     make docn
