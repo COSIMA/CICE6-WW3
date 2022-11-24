@@ -8,6 +8,8 @@
 # do-it-all Makefile for others (see cime/CIME/Tools/Makefile). The Makefile
 # expects a specific directory structure for the build.
 
+set -e
+
 ACTIVE_OCN=false
 
 esmf_dir=/scratch/tm70/mrd599/esmf-8.3.0
@@ -70,7 +72,7 @@ echo -e "===================="
 # CASEROOT to there (Depends.intel, Macros.make)
 cd ${bld_dir}/ice/obj
 cp ${cwd}/Filepath.cice6 ${bld_dir}/ice/obj/Filepath
-make complib -j 8 COMP_NAME=cice COMPLIB=${bld_dir}/lib/libice.a -f ${cesm_dir}/cime/CIME/Tools/Makefile USER_CPPDEFS=" -Dncdf" CIME_MODEL=cesm  SMP=FALSE CASEROOT=${cwd} CASETOOLS=${cesm_dir}/cime/CIME/Tools CIMEROOT=${cesm_dir}/cime SRCROOT=${cesm_dir} COMP_INTERFACE="nuopc" COMPILER="intel" DEBUG="FALSE" EXEROOT=${bld_dir} INCROOT="${bld_dir}/lib/include" LIBROOT="${bld_dir}/lib" MACH="gadi" MPILIB="openmpi" NINST_VALUE="c1a1i1o1r1w1" OS="LINUX" PIO_VERSION=2 SHAREDLIBROOT=${bld_dir} SMP_PRESENT="FALSE" USE_ESMF_LIB="TRUE" USE_MOAB="FALSE" COMP_LND="slnd" USE_PETSC="FALSE"
+make complib -j 8 COMP_NAME=cice COMPLIB=${bld_dir}/lib/libice.a -f ${cesm_dir}/cime/CIME/Tools/Makefile USER_CPPDEFS=" -Dncdf" CIME_MODEL="cesm"  SMP="FALSE" CASEROOT=${cwd} CASETOOLS=${cesm_dir}/cime/CIME/Tools CIMEROOT=${cesm_dir}/cime SRCROOT=${cesm_dir} COMP_INTERFACE="nuopc" COMPILER="intel" DEBUG="FALSE" EXEROOT=${bld_dir} INCROOT=${bld_dir}/lib/include LIBROOT=${bld_dir}/lib MACH="gadi" MPILIB="openmpi" NINST_VALUE="c1a1i1o1r1w1" OS="LINUX" PIO_VERSION=2 SHAREDLIBROOT=${bld_dir} SMP_PRESENT="FALSE" USE_ESMF_LIB="TRUE" USE_MOAB="FALSE" COMP_LND="slnd" USE_PETSC="FALSE"
 cd ${cwd}
 echo -e "====================\n"
 
@@ -79,28 +81,15 @@ echo -e "===================="
 cd ${bld_dir}/wav/obj
 cmake -DCASEROOT=${cwd} -DCIMEROOT=${cesm_dir}/cime -DCOMPILER="intel" -DLIBROOT=${bld_dir}/lib -DMACH="gadi" -DMPILIB="openmpi" -DNINST_VALUE="c1a1i1o1r1w1" -DOS="LINUX" -DCMAKE_Fortran_COMPILER_WORKS=1 -DCMAKE_INSTALL_PREFIX:PATH=/ -DLIBROOT=${bld_dir}/lib ${cesm_dir}/components/ww3dev/WW3/model/src
 make install VERBOSE=1 DESTDIR=${bld_dir}
+cd ${cwd}
 echo -e "====================\n"
 
 echo -e "Building CMEPS executable"
 echo -e "===================="
 cd ${bld_dir}/cpl/obj
-flags="-I. -I${sharedlib_dir}/CDEPS/fox/include -I${sharedlib_dir}/CDEPS/dshr -I${sharedlib_dir}/include -I${sharedlib_dir}/nuopc/esmf/c1a1i1o1r1w1/include -I/apps/netcdf/4.7.3/include -I${bld_dir}/atm/obj -I${bld_dir}/ice/obj -I${bld_dir}/ocn/obj -I${bld_dir}/glc/obj -I${bld_dir}/rof/obj -I${bld_dir}/wav/obj -I${bld_dir}/esp/obj -I${bld_dir}/lnd/obj -I. -I${cesm_dir}/components/cmeps/mediator -I${cesm_dir}/components/cmeps/cesm/flux_atmocn -I${cesm_dir}/comonents/cmeps/cesm/driver -I${bld_dir}/lib/include -qno-opt-dynamic-align  -convert big_endian -assume byterecl -ftz -traceback -assume realloc_lhs -fp-model source -O2 -debug minimal -I${esmf_dir}/mod/modg/Linux.intel.x86_64_medium.openmpi.default -I${esmf_dir}/src/include -I/apps/netcdf/4.7.3/include  -DLINUX  -DCESMCOUPLED -DFORTRANUNDERSCORE -DCPRINTEL -DNDEBUG -DUSE_ESMF_LIB -DHAVE_MPI -DNUOPC_INTERFACE -DPIO2 -DHAVE_SLASHPROC -DESMF_VERSION_MAJOR=8 -DESMF_VERSION_MINOR=3 -DATM_PRESENT -DICE_PRESENT -DOCN_PRESENT -DROF_PRESENT -DWAV_PRESENT -DMED_PRESENT -DPIO2 -free -DUSE_CONTIGUOUS="
-
-# The order of these is important
-cmeps_src_files=( cesm/driver/esm_time_mod.F90 mediator/med_kind_mod.F90 cesm/flux_atmocn/shr_flux_mod.F90 cesm/driver/t_driver_timers_mod.F90 cesm/driver/util.F90 mediator/med_constants_mod.F90 mediator/med_utils_mod.F90 mediator/med_methods_mod.F90 mediator/med_internalstate_mod.F90 mediator/med_phases_ocnalb_mod.F90 mediator/med_io_mod.F90 mediator/med_time_mod.F90 mediator/esmFlds.F90 mediator/med_phases_profile_mod.F90 mediator/med_diag_mod.F90 mediator/med_map_mod.F90 mediator/med_merge_mod.F90 mediator/esmFldsExchange_cesm_mod.F90 mediator/esmFldsExchange_nems_mod.F90 mediator/esmFldsExchange_hafs_mod.F90 mediator/med_phases_history_mod.F90 mediator/med_phases_prep_lnd_mod.F90 mediator/med_phases_prep_ice_mod.F90 mediator/med_fraction_mod.F90 mediator/med_phases_prep_rof_mod.F90 mediator/med_phases_prep_wav_mod.F90 mediator/med_phases_aofluxes_mod.F90 mediator/med_phases_post_wav_mod.F90 mediator/med_phases_post_rof_mod.F90 mediator/med_phases_post_glc_mod.F90 mediator/med_phases_post_atm_mod.F90 mediator/med_phases_prep_glc_mod.F90 mediator/med_phases_post_ice_mod.F90 mediator/med_phases_post_lnd_mod.F90 mediator/med_phases_restart_mod.F90 mediator/med_phases_post_ocn_mod.F90 mediator/med_phases_prep_atm_mod.F90 mediator/med_phases_prep_ocn_mod.F90 mediator/med.F90 cesm/driver/esm.F90 cesm/driver/ensemble_driver.F90 cesm/driver/esmApp.F90 )
-
-for file in ${cmeps_src_files[@]}; do
-    mpif90 -c $flags ${cesm_dir}/components/cmeps/$file
-done
-
-object_files=()
-for file in ${cmeps_src_files[@]}; do
-    bname=$(basename $file)
-    object_files+=( "./${bname%.F90}.o" )
-done
-
-mpif90 -o ${bld_dir}/cesm.exe ${object_files[@]} -L${bld_dir}/lib/ -latm -lice -lrof -lwav -locn -L${sharedlib_dir}/CDEPS/dshr -ldshr -L${sharedlib_dir}/CDEPS/streams -lstreams -L${sharedlib_dir}/nuopc/esmf/c1a1i1o1r1w1/lib -lcsm_share -L${sharedlib_dir}/lib -lpiof -lpioc -lgptl -lmct -lmpeu -mkl=cluster -mkl=cluster -lnetcdf -lnetcdff -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -liomp5 -lm -L${sharedlib_dir}/CDEPS/fox/lib -lFoX_dom -lFoX_sax -lFoX_utils -lFoX_fsys -lFoX_wxml -lFoX_common -lFoX_fsys -L${esmf_dir}/lib/libg/Linux.intel.x86_64_medium.openmpi.default -Wl,-rpath,${esmf_dir}/lib/libg/Linux.intel.x86_64_medium.openmpi.default -lesmf -lmpi_cxx -cxxlib -lrt -ldl -mkl -lnetcdff -lnetcdf -lpioc -L${esmf_dir}/lib/libg/Linux.intel.x86_64_medium.openmpi.default -L/apps/netcdf/4.7.3/lib
+cp ${cwd}/Filepath.cmeps ${bld_dir}/cpl/obj/Filepath
+make exec_se -j 8 EXEC_SE=${bld_dir}/cesm.exe COMP_NAME="driver" CIME_MODEL="cesm"  SMP="FALSE" CASEROOT=${cwd} CASETOOLS=${cesm_dir}/cime/CIME/Tools CIMEROOT=${cesm_dir}/cime SRCROOT=${cesm_dir} COMP_INTERFACE="nuopc" COMPILER="intel" DEBUG="FALSE" EXEROOT=${bld_dir} INCROOT=${bld_dir}/lib/include LIBROOT=${bld_dir}/lib MACH="gadi" MPILIB="openmpi" NINST_VALUE="c1a1i1o1r1w1" OS="LINUX" PIO_VERSION=2 SHAREDLIBROOT=${bld_dir} SMP_PRESENT="FALSE" USE_ESMF_LIB="TRUE" USE_MOAB="FALSE" COMP_LND="slnd" USE_PETSC="FALSE" USE_FMS="FALSE" LND_PRESENT="FALSE" GLC_PRESENT="FALSE" ESP_PRESENT="FALSE" IAC_PRESENT="FALSE" -f ${cesm_dir}/cime/CIME/Tools/Makefile
+cd ${cwd}
 echo -e "====================\n"
 
-cd ${cwd}
 echo -e "Build completed successfully"
