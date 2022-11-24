@@ -10,7 +10,7 @@ This directory contains scripts exploring building a CICE6-WW3-DOCN-DATM-DROF-SL
 
 `build.sh` (working)
 --------------------
-This script builds all the model components and the CMEPS `cesm.exe` exectuable
+This script builds all the model components and the CMEPS `cesm.exe` exectuable. The script includes an option to build either MOM6 (`ACTIVE_OCN=true`) or a data ocean model (`ACTIVE_OCN=false`).
 
 `build_switch.sh` (not working)
 -------------------------------

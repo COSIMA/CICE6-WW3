@@ -10,7 +10,7 @@
 
 set -e
 
-ACTIVE_OCN=false
+ACTIVE_OCN=true
 
 esmf_dir=/scratch/tm70/mrd599/esmf-8.3.0
 . /etc/profile.d/modules.sh
@@ -43,18 +43,30 @@ ln -sf ${bld_dir}/rof/obj/libdrof.a ${bld_dir}/lib/librof.a
 cd ${cwd}
 echo -e "====================\n"
 
+# ln has annoying behaviour with target dirs. Let's just remove
+# any existing directory for simplicity
+ocn_obj=${bld_dir}/ocn/obj
+if [ -d ${ocn_obj} ]; then
+    if [ -L ${ocn_obj} ]; then
+        unlink ${ocn_obj}
+    else
+        rm -r ${ocn_obj}
+    fi
+fi
 if [ "$ACTIVE_OCN" = true ] ; then
     echo -e "Building mom6"
     echo -e "===================="
-    echo -e "    Not implemented" && exit
+    mkdir -p ${ocn_obj}/FMS
+    
+    cp ${cwd}/Filepath.fms ${ocn_obj}/FMS/Filepath
+    make -f ${cesm_dir}/libraries/FMS/Makefile.cesm -C ${ocn_obj}/FMS CASEROOT=${cwd} USER_INCLDIR="-I${cesm_dir}/libraries/FMS/src/include -I${cesm_dir}/libraries/FMS/src/fms2_io/include -I${cesm_dir}/libraries/FMS/src/mpp/include" COMPLIB=libfms.a CASETOOLS=${cesm_dir}/cime/CIME/Tools CIMEROOT=${cesm_dir}/cime COMP_INTERFACE="nuopc" COMPILER="intel" DEBUG="FALSE" EXEROOT=${bld_dir} INCROOT=${bld_dir}/lib/include LIBROOT=${bld_dir}/lib MACH="gadi" MPILIB="openmpi" NINST_VALUE="c1a1i1o1r1w1" OS="LINUX" SHAREDLIBROOT=${bld_dir} USE_ESMF_LIB="TRUE" BUILD_THREADED="FALSE"
+
+    cp ${cwd}/Filepath.mom6 ${ocn_obj}/Filepath
+    make complib -j 8 COMP_NAME="mom" COMPLIB=${bld_dir}/lib/libocn.a -f ${cesm_dir}/cime/CIME/Tools/Makefile USER_INCLDIR="-I${cesm_dir}/libraries/FMS/src/include -I${cesm_dir}/libraries/FMS/src/mpp/include -I${bld_dir}/ocn/obj/FMS" CIME_MODEL="cesm" SMP="FALSE" CASEROOT=${cwd} CASETOOLS=${cesm_dir}/cime/CIME/Tools CIMEROOT=${cesm_dir}/cime SRCROOT=${cesm_dir} COMP_INTERFACE="nuopc" COMPILER="intel" DEBUG="FALSE" EXEROOT=${bld_dir} INCROOT=${bld_dir}/lib/include LIBROOT=${bld_dir}/lib MACH="gadi" MPILIB="openmpi" NINST_VALUE="c1a1i1o1r1w1" OS="LINUX" PIO_VERSION=2 SHAREDLIBROOT=${bld_dir} SMP_PRESENT="FALSE" USE_ESMF_LIB="TRUE" USE_MOAB="FALSE" COMP_LND="slnd" COMP_ATM="datm" USE_PETSC="FALSE"
 else
     echo -e "Building data ocn model"
     echo -e "===================="
     # ln has annoying behaviour with target dirs
-    ocn_obj=${bld_dir}/ocn/obj
-    if [ -d ${ocn_obj} ] && [ ! -L ${ocn_obj} ]; then
-        rm -r ${ocn_obj}
-    fi
     ln -sf ${sharedlib_dir}/CDEPS/docn ${ocn_obj}
     cd ${ocn_obj}
     make docn
@@ -65,14 +77,9 @@ echo -e "====================\n"
 
 echo -e "Building cice6"
 echo -e "===================="
-# Note, the generic CIME Makefile used here looks for xmlquery in 
-# CASEROOT. However, it only uses this to query what the atm
-# component is, which is not important to the ice build. So I think
-# we can safely set CASEROOT=${cwd} and copy other files looked for
-# CASEROOT to there (Depends.intel, Macros.make)
 cd ${bld_dir}/ice/obj
 cp ${cwd}/Filepath.cice6 ${bld_dir}/ice/obj/Filepath
-make complib -j 8 COMP_NAME=cice COMPLIB=${bld_dir}/lib/libice.a -f ${cesm_dir}/cime/CIME/Tools/Makefile USER_CPPDEFS=" -Dncdf" CIME_MODEL="cesm"  SMP="FALSE" CASEROOT=${cwd} CASETOOLS=${cesm_dir}/cime/CIME/Tools CIMEROOT=${cesm_dir}/cime SRCROOT=${cesm_dir} COMP_INTERFACE="nuopc" COMPILER="intel" DEBUG="FALSE" EXEROOT=${bld_dir} INCROOT=${bld_dir}/lib/include LIBROOT=${bld_dir}/lib MACH="gadi" MPILIB="openmpi" NINST_VALUE="c1a1i1o1r1w1" OS="LINUX" PIO_VERSION=2 SHAREDLIBROOT=${bld_dir} SMP_PRESENT="FALSE" USE_ESMF_LIB="TRUE" USE_MOAB="FALSE" COMP_LND="slnd" USE_PETSC="FALSE"
+make complib -j 8 COMP_NAME=cice COMPLIB=${bld_dir}/lib/libice.a -f ${cesm_dir}/cime/CIME/Tools/Makefile USER_CPPDEFS=" -Dncdf" CIME_MODEL="cesm"  SMP="FALSE" CASEROOT=${cwd} CASETOOLS=${cesm_dir}/cime/CIME/Tools CIMEROOT=${cesm_dir}/cime SRCROOT=${cesm_dir} COMP_INTERFACE="nuopc" COMPILER="intel" DEBUG="FALSE" EXEROOT=${bld_dir} INCROOT=${bld_dir}/lib/include LIBROOT=${bld_dir}/lib MACH="gadi" MPILIB="openmpi" NINST_VALUE="c1a1i1o1r1w1" OS="LINUX" PIO_VERSION=2 SHAREDLIBROOT=${bld_dir} SMP_PRESENT="FALSE" USE_ESMF_LIB="TRUE" USE_MOAB="FALSE" COMP_LND="slnd" COMP_ATM="datm" USE_PETSC="FALSE"
 cd ${cwd}
 echo -e "====================\n"
 
@@ -88,7 +95,7 @@ echo -e "Building CMEPS executable"
 echo -e "===================="
 cd ${bld_dir}/cpl/obj
 cp ${cwd}/Filepath.cmeps ${bld_dir}/cpl/obj/Filepath
-make exec_se -j 8 EXEC_SE=${bld_dir}/cesm.exe COMP_NAME="driver" CIME_MODEL="cesm"  SMP="FALSE" CASEROOT=${cwd} CASETOOLS=${cesm_dir}/cime/CIME/Tools CIMEROOT=${cesm_dir}/cime SRCROOT=${cesm_dir} COMP_INTERFACE="nuopc" COMPILER="intel" DEBUG="FALSE" EXEROOT=${bld_dir} INCROOT=${bld_dir}/lib/include LIBROOT=${bld_dir}/lib MACH="gadi" MPILIB="openmpi" NINST_VALUE="c1a1i1o1r1w1" OS="LINUX" PIO_VERSION=2 SHAREDLIBROOT=${bld_dir} SMP_PRESENT="FALSE" USE_ESMF_LIB="TRUE" USE_MOAB="FALSE" COMP_LND="slnd" USE_PETSC="FALSE" USE_FMS="FALSE" LND_PRESENT="FALSE" GLC_PRESENT="FALSE" ESP_PRESENT="FALSE" IAC_PRESENT="FALSE" -f ${cesm_dir}/cime/CIME/Tools/Makefile
+make exec_se -j 8 EXEC_SE=${bld_dir}/cesm.exe COMP_NAME="driver" CIME_MODEL="cesm"  SMP="FALSE" CASEROOT=${cwd} CASETOOLS=${cesm_dir}/cime/CIME/Tools CIMEROOT=${cesm_dir}/cime SRCROOT=${cesm_dir} COMP_INTERFACE="nuopc" COMPILER="intel" DEBUG="FALSE" EXEROOT=${bld_dir} INCROOT=${bld_dir}/lib/include LIBROOT=${bld_dir}/lib MACH="gadi" MPILIB="openmpi" NINST_VALUE="c1a1i1o1r1w1" OS="LINUX" PIO_VERSION=2 SHAREDLIBROOT=${bld_dir} SMP_PRESENT="FALSE" USE_ESMF_LIB="TRUE" USE_MOAB="FALSE" COMP_LND="slnd" COMP_ATM="datm" USE_PETSC="FALSE" USE_FMS="FALSE" LND_PRESENT="FALSE" GLC_PRESENT="FALSE" ESP_PRESENT="FALSE" IAC_PRESENT="FALSE" -f ${cesm_dir}/cime/CIME/Tools/Makefile
 cd ${cwd}
 echo -e "====================\n"
 
