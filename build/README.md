@@ -1,7 +1,7 @@
 Exploring CICE6-WW3-DOCN-DATM-DROF CESM build
 =============================================
 
-This directory contains scripts exploring building a CICE6-WW3-DOCN-DATM-DROF-SLND-SGLC CESM coonfiguration. Two build scripts are provided. Both assume that shared libs are already built at `/scratch/tm70/ds0092/cime/scratch/D_JRA_WD/bld`. The required shared libraries can be built using (for example) the CIME `GMOM_JRA_WD` compset:
+This directory contains scripts exploring building a CICE6-WW3-DOCN-DATM-DROF-SLND-SGLC CESM configuration. Two build scripts are provided. Both assume that shared libs are already built at `/scratch/tm70/ds0092/cime/scratch/D_JRA_WD/bld`. The required shared libraries can be built using (for example) the CIME `GMOM_JRA_WD` compset:
 ```
 ./create_newcase --case D_JRA_WD --compset GMOM_JRA_WD --res f19_g17_rx1 --machine gadi --run-unsupported
 cd D_JRA_WD
