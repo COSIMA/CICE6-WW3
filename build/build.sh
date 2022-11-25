@@ -11,7 +11,7 @@
 
 set -e
 
-ACTIVE_OCN=true
+ACTIVE_OCN=false
 
 esmf_dir=/scratch/tm70/mrd599/esmf-8.3.0
 . /etc/profile.d/modules.sh
@@ -24,7 +24,7 @@ export ESMFMKFILE=$esmf_dir/lib/libg/Linux.intel.x86_64_medium.openmpi.default/e
 cwd=$(pwd)
 
 cesm_dir=/g/data/tm70/ds0092/CESM
-bld_dir=/scratch/tm70/ds0092/cime/scratch/D_JRA_WD_mom/bld
+bld_dir=/scratch/tm70/ds0092/cime/scratch/D_JRA_WD/bld
 sharedlib_dir=${bld_dir}/intel/openmpi/nodebug/nothreads/nuopc
 
 
