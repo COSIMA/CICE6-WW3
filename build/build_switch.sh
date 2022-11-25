@@ -53,4 +53,4 @@ done
 mpif90 -o ${D_bld_dir}/cesm.exe ${object_files[@]} -L${GMOM_bld_dir}/lib/ -latm -lice -lrof -lwav -L${D_bld_dir}/lib/ -locn -L${sharedlib_dir}/CDEPS/dshr -ldshr -L${sharedlib_dir}/CDEPS/streams -lstreams -L${sharedlib_dir}/nuopc/esmf/c1a1i1o1r1w1/lib -lcsm_share -L${sharedlib_dir}/lib -lpiof -lpioc -lgptl -lmct -lmpeu -mkl=cluster -mkl=cluster -lnetcdf -lnetcdff -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -liomp5 -lm -L${sharedlib_dir}/CDEPS/fox/lib -lFoX_dom -lFoX_sax -lFoX_utils -lFoX_fsys -lFoX_wxml -lFoX_common -lFoX_fsys -L${esmf_dir}/lib/libg/Linux.intel.x86_64_medium.openmpi.default -Wl,-rpath,${esmf_dir}/lib/libg/Linux.intel.x86_64_medium.openmpi.default -lesmf -lmpi_cxx -cxxlib -lrt -ldl -mkl -lnetcdff -lnetcdf -lpioc -L${esmf_dir}/lib/libg/Linux.intel.x86_64_medium.openmpi.default -L/apps/netcdf/4.7.3/lib
 
 cd ${cwd}
-echo -e "Build completed successfully"
+echo -e "===================="
