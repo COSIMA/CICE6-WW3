@@ -1,10 +1,10 @@
 # Experimental Payu configuration for 1 deg CICE6-WW3-docn-datm-drof configuration using CMEPS with the CESM driver
 
-docn = HadOIBl climatology
+data ocean (docn) = HadOIBl climatology
 
-datm = JRA v1.3 IAF
+data atmosphere (datm) = JRA v1.3 (NB: not JRA55-do), 1958-2016, no-leap calendar
 
-drof = JRA v1.1 IAF
+data runoff (drof) = JRA v1.1 (NB: not JRA55-do), 1958-2016, no-leap calendar
 
 Note:
 - **This is an untested Payu configuration for a kluged-together and untested CESM configuration**. This configuration and the executable it uses were kluged together from an officially-unsupported CESM configuration (The CIME GMOM_JRA_WD "compset"). Details of the kluging can be found in the `build` directory of this repo. 
