@@ -51,6 +51,10 @@ input:
 collate: false
 runlog: true
 
-storage:
-  gdata:
-    - ik11
+modules:
+  use:
+      - /g/data/ik11/spack/0.20.1/modules/access-om3/cesm-0.x.0/linux-rocky8-x86_64
+  load:
+      - intel-compiler/2021.6.0
+      - openmpi/4.1.4
+      - parallelio/2.5.10
