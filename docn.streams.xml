@@ -9,7 +9,7 @@
    <dtlimit>1.5</dtlimit>
    <year_first>0</year_first>
    <year_last>0</year_last>
-   <year_align>1</year_align>
+   <year_align>0</year_align>
    <vectors>null</vectors>
    <meshfile>./input/sst_HadOIBl_bc_1x1_clim_c101029_ESMFmesh_120520.nc</meshfile>
    <lev_dimname>null</lev_dimname>
