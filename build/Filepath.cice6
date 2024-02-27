@@ -1,9 +1,0 @@
-/g/data/tm70/ds0092/CESM/components/cice/src/cicecore/shared
-/g/data/tm70/ds0092/CESM/components/cice/src/icepack/columnphysics
-/g/data/tm70/ds0092/CESM/components/cice/src/cicecore/cicedynB/infrastructure
-/g/data/tm70/ds0092/CESM/components/cice/src/cicecore/cicedynB/infrastructure/io/io_pio2
-/g/data/tm70/ds0092/CESM/components/cice/src/cicecore/cicedynB/infrastructure/comm/mpi
-/g/data/tm70/ds0092/CESM/components/cice/src/cicecore/cicedynB/analysis
-/g/data/tm70/ds0092/CESM/components/cice/src/cicecore/cicedynB/dynamics
-/g/data/tm70/ds0092/CESM/components/cice/src/cicecore/cicedynB/general
-/g/data/tm70/ds0092/CESM/components/cice/src/cicecore/drivers/nuopc/cmeps

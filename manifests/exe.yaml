@@ -1,8 +1,8 @@
 format: yamanifest
 version: 1.0
 ---
-work/cesm.exe:
-  fullpath: /scratch/tm70/ds0092/cime/scratch/D_JRA_WD/bld/cesm.exe
+work/access-om3-CICE6-WW3:
+  fullpath: /g/data/tm70/as2285/access-om3/Release/bin/access-om3-CICE6-WW3
   hashes:
-    binhash: 5d767cf9c2fc1aad495feb6e8d93e0a1
-    md5: 5b079dfd87649814e5aa71f6583d1e69
+    binhash: 8b921f4c768dd33ced55cc5515253511
+    md5: f0f19a3643e50e0e82798074f29c7597

@@ -7,4 +7,5 @@
   restfilm = "null"
   skip_restart_read = .false.
   sst_constant_value = -1.0
+  import_data_fields = 'So_t'
 /
