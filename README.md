@@ -1,3 +1,6 @@
+> [!IMPORTANT]  
+> **This repository has been archived and is read-only. ACCESS-OM3 configurations are maintained at https://github.com/ACCESS-NRI/access-om3-configs**
+
 # Experimental Payu configuration for 1 deg CICE6-WW3-docn-datm-drof configuration using CMEPS with the CESM driver
 
 data ocean (docn) = HadOIBl climatology
